@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { jigPaths } from './lib/paths.mjs';
+import { isMain, jigPaths } from './lib/paths.mjs';
 
 function uniqStrings(arr) {
   const seen = new Set();
@@ -136,7 +136,7 @@ export function writeMemory(projectRoot, findings) {
   return written;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const [projectRoot, ...sliceFiles] = process.argv.slice(2);
   if (!projectRoot || !sliceFiles.length) {
     console.error('usage: node write-memory.mjs <projectRoot> <slice1.json> [slice2.json ...]');

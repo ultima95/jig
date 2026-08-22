@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { isMain } from './lib/paths.mjs';
 
 export function appendProgress(taskDir, phase, note) {
   const date = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -8,7 +9,7 @@ export function appendProgress(taskDir, phase, note) {
   return entry;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const [taskDir, phase, ...noteParts] = process.argv.slice(2);
   const note = noteParts.join(' ');
   if (!taskDir || !phase || !note) {

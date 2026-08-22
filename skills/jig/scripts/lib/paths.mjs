@@ -41,3 +41,18 @@ export function templatesDir() {
   const here = path.dirname(fileURLToPath(import.meta.url));
   return path.resolve(here, '..', '..', 'templates');
 }
+
+// True when `metaUrl`'s script is the one Node was invoked with. Compares real
+// paths rather than URL strings: the CLI entry point can be a symlink (skills are
+// installed under .agents/ and linked into .claude/), and process.argv[1] keeps
+// the link path while import.meta.url resolves to the target — so a plain string
+// compare silently skips the CLI block and the command prints nothing.
+export function isMain(metaUrl) {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    return fs.realpathSync(fileURLToPath(metaUrl)) === fs.realpathSync(entry);
+  } catch {
+    return false;
+  }
+}

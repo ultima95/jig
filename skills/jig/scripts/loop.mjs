@@ -1,4 +1,5 @@
 import { readState, writeState } from './lib/state.mjs';
+import { isMain } from './lib/paths.mjs';
 
 const LOOP_KEYS = ['test', 'review'];
 
@@ -23,7 +24,7 @@ export function resetLoop(taskDir, key) {
   return 0;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const [taskDir, cmd, key] = process.argv.slice(2);
   if (!taskDir || !cmd || !key) {
     console.error('usage: node loop.mjs <taskDir> <bump|reset> <test|review>');

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { jigPaths, templatesDir } from './lib/paths.mjs';
+import { isMain, jigPaths, templatesDir } from './lib/paths.mjs';
 
 const MEMORY_FILES = [
   'architecture.md', 'modules.md', 'conventions.md',
@@ -32,7 +32,7 @@ export function scaffoldJig(targetRoot, { force = false } = {}) {
   return { created, skipped };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const target = process.argv[2] || process.cwd();
   const res = scaffoldJig(target, { force: process.argv.includes('--force') });
   console.log(`Scaffolded .jig in ${target}`);

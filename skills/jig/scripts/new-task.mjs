@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { jigPaths, templatesDir } from './lib/paths.mjs';
+import { isMain, jigPaths, templatesDir } from './lib/paths.mjs';
 import { slugify, uniqueSlug, dateStamp } from './lib/slug.mjs';
 import { newTaskState, writeState } from './lib/state.mjs';
 
@@ -47,7 +47,7 @@ export function createTask(projectRoot, { title, type = 'feature', track, date =
   return { taskId, taskDir, slug, track: resolvedTrack };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const title = process.argv[2];
   const type = process.argv[3] || 'feature';
   const track = process.argv[4]; // optional; defaults by type

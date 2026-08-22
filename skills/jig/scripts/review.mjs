@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { readState } from './lib/state.mjs';
+import { isMain } from './lib/paths.mjs';
 
 function key(f) { return `${f.dimension}::${f.file}::${f.line}::${f.claim}`; }
 
@@ -42,7 +43,7 @@ export function writeReview(taskDir, findings) {
   return deduped.length;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const [cmd, ...rest] = process.argv.slice(2);
   if (cmd === 'write') {
     const [taskDir, findingsFile] = rest;

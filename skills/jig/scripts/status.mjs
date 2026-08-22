@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { jigPaths } from './lib/paths.mjs';
+import { isMain, jigPaths } from './lib/paths.mjs';
 
 export function listTasks(projectRoot) {
   const { tasksDir } = jigPaths(projectRoot);
@@ -35,6 +35,6 @@ export function formatStatus(tasks) {
   return lines.join('\n');
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   console.log(formatStatus(listTasks(process.cwd())));
 }

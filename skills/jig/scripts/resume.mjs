@@ -1,13 +1,13 @@
 import path from 'node:path';
 import { readState } from './lib/state.mjs';
-import { jigPaths } from './lib/paths.mjs';
+import { isMain, jigPaths } from './lib/paths.mjs';
 import { listTasks } from './status.mjs';
 
 export function resumableTasks(projectRoot) {
   return listTasks(projectRoot).filter((t) => t.phase !== 'done');
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const [projectRoot = process.cwd(), taskId] = process.argv.slice(2);
   if (taskId) {
     const { tasksDir } = jigPaths(projectRoot);

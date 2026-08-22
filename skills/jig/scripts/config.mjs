@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { jigPaths } from './lib/paths.mjs';
+import { isMain, jigPaths } from './lib/paths.mjs';
 import { parseConfig, validate, getValue, applySet, SCHEMA } from './lib/config.mjs';
 
 export function renderShow(text) {
@@ -40,7 +40,7 @@ function display(v) {
   return Array.isArray(v) ? `[${v.join(', ')}]` : String(v);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const [verb = 'show', a, b] = process.argv.slice(2);
   const { config } = jigPaths(process.cwd());
   if (!fs.existsSync(config)) {

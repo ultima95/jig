@@ -3,6 +3,7 @@ import path from 'node:path';
 import { readState, writeState } from './lib/state.mjs';
 import { nextPhase } from './lib/transition.mjs';
 import { setFrontMatterField } from './lib/frontmatter.mjs';
+import { isMain } from './lib/paths.mjs';
 
 const GATES = ['spec_plan', 'review'];
 const GATE_VALUES = ['pending', 'approved'];
@@ -46,7 +47,7 @@ export function setField(taskDir, key, value) {
   return s[key];
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMain(import.meta.url)) {
   const [taskDir, cmd, a, b] = process.argv.slice(2);
   if (!taskDir || !cmd) {
     console.error('usage: node set-state.mjs <taskDir> <phase <name> | advance | gate <gate> <value> | field <key> <value>>');
