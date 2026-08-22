@@ -25,8 +25,9 @@ it informs the approach. Load only what you need.
 4. **Spec gate** — read `gates.spec_plan` from `.jig/config.yml`:
    - `hard` (default) AND track is not `hotfix`: present a concise summary to the
      developer — Problem/Goal, Acceptance criteria, and the Plan steps — and ask
-     them to APPROVE or request changes. Wait for explicit approval; revise and
-     re-present if changes are requested.
+     them to APPROVE or request changes. Summarize in the same plain language Intake
+     used (`phases/intake.md` § Asking questions) — `spec.md` itself stays precise.
+     Wait for explicit approval; revise and re-present if changes are requested.
    - `hotfix` track, or `soft`/`off` config: do not stop; record the plan and proceed.
 5. On approval (or when the gate is skipped), record it and advance:
    `node "<SKILL_DIR>/scripts/set-state.mjs" "<taskDir>" gate spec_plan approved`
