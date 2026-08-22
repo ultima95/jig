@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-22
+
+### Changed
+
+- Intake now asks its clarifying questions in plain language. Questions are sorted by who
+  can answer them: observable behavior is asked about in words from the user's world,
+  while internal mechanism is decided by the agent, disclosed in one line, and logged under
+  "Assumptions & resolved questions". Every question offers concrete choices with a
+  recommendation and an escape hatch. `spec.md` is unchanged and stays precise -- only the
+  conversation gets plainer.
+- Spec & Plan reads decisions back in the same plain language at the hard spec gate.
+
+### Fixed
+
+- CLI entry scripts no longer no-op when invoked through a symlinked skill path. All 10
+  scripts gated their main block on ``import.meta.url === `file://${process.argv[1]}` ``,
+  comparing a URL string to a raw path; because installers link the skill into
+  `.claude/skills/` and `SKILL.md` invokes scripts via `<SKILL_DIR>`, every command exited
+  0 printing nothing. A shared `isMain()` helper now compares real paths, which also fixes
+  paths containing spaces, `#`, or `?`.
+
 ## [0.5.0] - 2026-07-09
 
 ### Added
@@ -83,7 +104,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Ship, and `/sdlc cleanup` after merge.
 - `/sdlc backlog` to groom deferred work in `.sdlc/backlog.md`.
 
-[Unreleased]: https://github.com/ultima95/jig/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/ultima95/jig/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/ultima95/jig/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/ultima95/jig/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/ultima95/jig/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/ultima95/sdlc-harness/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/ultima95/sdlc-harness/compare/v0.2.1...v0.2.2

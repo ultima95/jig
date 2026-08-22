@@ -7,11 +7,11 @@
 Understand the codebase once, then drive every task through a repeatable, human‑gated lifecycle: **intake → spec & plan → implement → test → review → ship**.
 
 ![Claude Code skill](https://img.shields.io/badge/Claude%20Code-skill-8A2BE2)
-![tests](https://img.shields.io/badge/tests-93%20passing-2ea44f)
+![tests](https://img.shields.io/badge/tests-97%20passing-2ea44f)
 ![node](https://img.shields.io/badge/node-%E2%89%A5%2018-339933?logo=nodedotjs&logoColor=white)
 ![dependencies](https://img.shields.io/badge/dependencies-zero-0aa)
 ![install](https://img.shields.io/badge/install-npx%20skills-111)
-![version](https://img.shields.io/badge/version-0.5.0-informational)
+![version](https://img.shields.io/badge/version-0.6.0-informational)
 
 </div>
 
