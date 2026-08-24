@@ -82,7 +82,7 @@ Then **restart Claude Code** so the `jig` skill is picked up. Requires Claude Co
 
 | Command | What it does |
 | --- | --- |
-| `/jig init` | 🧠 Investigate the repo and build **Project Memory** in `.jig/memory/`. |
+| `/jig init` | 🧠 Investigate the repo, build **Project Memory**, and walk through `.jig/config.yml` (skippable). |
 | `/jig task "<request>"` | 🎫 Take an issue / bug / feature from intake all the way to shipped. |
 | `/jig status` | 📋 List tasks and their current phase / gate state. |
 | `/jig config [get\|set\|check]` | ⚙️ View, set, or validate `.jig/config.yml`. |
@@ -134,7 +134,7 @@ skills/jig/
 - **`loops`** — `max_test`, `max_review` (bounded fix‑loops)
 - **`review`** — `dimensions` + `verify: adversarial`
 - **`ship`** — `mode: commit | pr`
-- **`git`** — `track_state` (commit `.jig/` state alongside code, or gitignore it — chosen at init) + feature-branch lifecycle: `branch` (create `<type>/<slug>` at Implement), `base` (`auto` or an explicit branch — prefer explicit for a stable default), `branch_from` (`remote` = branch off fresh `origin/<base>`; `local` = local base ref), `push`, `cleanup` (`on_merge | off`), `delete_remote`
+- **`git`** — `track_state` (commit `.jig/` state alongside code, or gitignore it — set during the init config walkthrough) + feature-branch lifecycle: `branch` (create `<type>/<slug>` at Implement), `base` (`auto` or an explicit branch — prefer explicit for a stable default), `branch_from` (`remote` = branch off fresh `origin/<base>`; `local` = local base ref), `push`, `cleanup` (`on_merge | off`), `delete_remote`
 - **`memory`** — `graph: auto|on|off`, `refresh: on_ship|manual`
 
 Manage these with **`/jig config`**: `show` (view all), `get <key>`, `set <key> <value>` (validates and preserves comments), and `check` (validate — exits non-zero on errors, so it works in CI).
