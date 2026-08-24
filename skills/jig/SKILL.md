@@ -21,21 +21,72 @@ and show the available sub-commands.
 ### init
 Scaffold `.jig/`, then run Phase 0 to build Project Memory.
 
-1. Run: `node "<SKILL_DIR>/scripts/scaffold.mjs" "$(pwd)"` and report created vs. skipped.
+1. Run: `node "<SKILL_DIR>/scripts/scaffold.mjs" "$(pwd)"` (add `--force` only if the
+   developer explicitly asked to re-scaffold) and report created vs. skipped. Note whether
+   `.jig/config.yml` itself is in the **created** list (fresh) or **skipped** (already
+   existed) — that decides whether step 3 runs.
 2. Run **Phase 0 — understand the codebase**: follow `<SKILL_DIR>/phases/understand.md`
-   to fan out explorer subagents, merge their findings, and populate `.jig/memory/`.
-3. **Decide whether `.jig/` is tracked in git** (git repo only) — ask the developer:
-   - **Track it (recommended)** — Jig state (spec, plan, progress, review, memory,
-     backlog) is git-versioned and shared, committed alongside the code it describes. Set
-     `git.track_state: true` in `.jig/config.yml`, then commit the scaffold: `git add .jig &&
-     git commit -m "chore: initialize jig"`. If the base is protected and rejects a
-     direct commit, tell the developer to commit `.jig/` (or open a PR).
-   - **Don't track it** — `.jig/` stays local-only (never dirties the tree, not shared). Set
-     `git.track_state: false`, add `.jig/` to `.gitignore`, and commit that:
-     `git add .gitignore && git commit -m "chore: ignore .jig state"`.
+   to fan out explorer subagents, merge their findings, and populate `.jig/memory/`. Its
+   `runbook` slice (`.jig/memory/runbook.md`) feeds the config wizard's project-commands
+   question in step 3.
+3. **Configure `.jig/config.yml`** — only if step 1 listed it under **created**. If it was
+   **skipped** (existing config, no `--force`), skip straight to step 4; an existing config
+   is never walked through implicitly.
+   1. Ask the developer: walk through settings now, or accept the scaffold defaults and
+      tune later with `/jig config`? On "defaults", skip ahead to step 3.3 — every key
+      stays as scaffolded.
+   2. On "walk through", ask each group below as its own message, in plain language: describe
+      the situation, offer lettered options, name a recommendation, and give an escape hatch
+      ("keep default" / "not sure"). After each answer, apply it right away —
+      `node "<SKILL_DIR>/scripts/config.mjs" set <key> <value>` — so a rejected value only
+      re-asks that one group; earlier groups are already applied and untouched.
+      - **Project commands** (`project.build`, `project.test`, `project.lint`) — if
+        `.jig/memory/runbook.md` names a build/test command, offer it as the suggested
+        default for `build`/`test`; free text either way. `lint` has no auto-detection —
+        ask plainly; default keeps the scaffold placeholder.
+      - **Gates** (`gates.spec_plan`, `gates.review`) — per checkpoint: stop and wait for
+        approval (`hard`), note and continue (`soft`), or skip it (`off`). Default both `hard`.
+      - **Trust level** (`trust_level`) — how much Jig asks vs. decides-and-discloses on its
+        own: `strict | normal | trusted`. Default `normal`.
+      - **Track defaults** (`tracks.default_by_type.{feature,refactor,bug,chore}`) — confirm
+        or customize the per-type default (`full | fast | hotfix`). Default: feature/refactor
+        → `full`, bug/chore → `fast`.
+      - **Loops** (`loops.max_test`, `loops.max_review`) — fix-and-retry attempts before a
+        phase escalates to the developer. Default `3` and `2`.
+      - **Memory** (`memory.graph`, `memory.refresh`) — use a code-graph MCP when present
+        (`auto | on | off`), and when Project Memory refreshes (`on_ship | manual`). Defaults
+        `auto`, `on_ship`.
+      - **Review** (`review.dimensions`, `review.verify`) — which dimensions to check (comma
+        list) and whether findings get adversarially re-verified before reporting
+        (`adversarial | off`). Defaults `correctness, security, tests, conventions`,
+        `adversarial`.
+      - **Ship mode** (`ship.mode`) — open a PR (`pr`) or leave commits for the developer to
+        push/PR themselves (`commit`). Default `commit`.
+      - **Git workflow** (`git.track_state`, `git.branch`, `git.base`, `git.branch_from`,
+        `git.push`) — commit `.jig/` state alongside code, or gitignore it (this is the old
+        standalone question, now part of the group); create a feature branch at Implement;
+        base branch (`auto`-detect, or an explicit name for a stable default); branch off
+        `remote` (fetch fresh `origin/<base>`) or `local`; push the branch at Ship. Defaults
+        `true`, `true`, `auto`, `remote`, `true`.
+      - **Git cleanup** (`git.cleanup`, `git.delete_remote`) — after a shipped branch merges,
+        delete it automatically (`on_merge`) or never (`off`), and whether to also delete the
+        remote branch. Defaults `on_merge`, `true`.
+   3. Read the resulting `git.track_state` — `node "<SKILL_DIR>/scripts/config.mjs" get
+      git.track_state` — and act on it regardless of whether the developer walked through
+      settings or took the defaults:
+      - `true` → commit the scaffold: `git add .jig && git commit -m "chore: initialize
+        jig"`. If the base is protected and rejects a direct commit, tell the developer to
+        commit `.jig/` themselves (or open a PR).
+      - `false` → add `.jig/` to `.gitignore` and commit that: `git add .gitignore &&
+        git commit -m "chore: ignore .jig state"`.
+   4. Run `node "<SKILL_DIR>/scripts/config.mjs" check` and report the result to the
+      developer (a `WARN`, e.g. an unfilled `project.lint` placeholder, is informational,
+      not a failure).
 4. Report which memory files were populated and suggest the user skim
    `.jig/memory/index.md`.
-5. Do **not** overwrite an existing config unless the user explicitly asks (`--force`).
+5. Do **not** overwrite an existing config unless the user explicitly asks (`--force`) —
+   this is also what gates step 3 (a fresh scaffold walks through config; an existing one
+   does not).
 
 ### task
 Create a new task folder for an issue/bug/feature.
