@@ -1,7 +1,7 @@
 {
   "name": "jig",
   "description": "Jig — a portable, gated software development lifecycle for AI coding agents: understand the codebase, then run tasks through intake, spec & plan, implement, test, review, and ship.",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "author": { "name": "ultima95" },
   "keywords": ["sdlc", "workflow", "agent", "review", "lifecycle", "code-review", "jig"]
 }

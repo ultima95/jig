@@ -11,7 +11,7 @@ Understand the codebase once, then drive every task through a repeatable, humanâ
 ![node](https://img.shields.io/badge/node-%E2%89%A5%2018-339933?logo=nodedotjs&logoColor=white)
 ![dependencies](https://img.shields.io/badge/dependencies-zero-0aa)
 ![install](https://img.shields.io/badge/install-npx%20skills-111)
-![version](https://img.shields.io/badge/version-0.6.0-informational)
+![version](https://img.shields.io/badge/version-0.7.0-informational)
 
 </div>
 

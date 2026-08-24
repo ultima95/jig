@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-08-24
+
+### Added
+
+- `/jig init` now walks the developer through `.jig/config.yml` in ten grouped,
+  plain-language questions after Phase 0 scans the repo -- project commands, gates, trust
+  level, track defaults, loops, memory, review, ship mode, and git workflow/cleanup --
+  instead of silently leaving them at scaffold defaults. Project build/test commands are
+  suggested from Phase 0's own runbook findings when available. An upfront question lets
+  developers skip straight to the defaults, and the wizard only runs on a fresh scaffold
+  (or `--force`), never against an existing config.
+
 ## [0.6.0] - 2026-08-22
 
 ### Changed
@@ -104,7 +116,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Ship, and `/sdlc cleanup` after merge.
 - `/sdlc backlog` to groom deferred work in `.sdlc/backlog.md`.
 
-[Unreleased]: https://github.com/ultima95/jig/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/ultima95/jig/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/ultima95/jig/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/ultima95/jig/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/ultima95/jig/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/ultima95/jig/compare/v0.3.0...v0.4.0
