@@ -7,6 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-09-10
+
+### Added
+
+- `/jig doctor` (`scripts/doctor.mjs`) -- audits every task for state drift: `state.json`
+  disagreeing with `spec.md`'s front-matter (`status`, `gate_spec_plan`, `gate_review`), and
+  a review gate approved with no `review.md` ever written. Exits non-zero when it finds any.
+  `/jig status` runs the same check and appends the result, so drift surfaces without being
+  asked for.
+- `/jig status --all` -- `done` tasks are now hidden by default with a count; `--all` shows
+  them. The task column also sizes itself to the widest id instead of shearing at 40 chars.
+- `review.md` gained `round` and a populated `fix` column, and preserves a hand-written
+  `## Summary` section across rewrites.
+- Explorer slices may now carry `modules[].group`, `risks[].severity`, and topic-grouped
+  `conventions` (`[{topic, rules[]}]`). All three are optional and the older shapes still
+  render, so existing `.slices/*.json` keep working.
+
+### Changed
+
+- **Loop counters are now bumped by the phase transition.** Moving a task back from `test`
+  or `review` into `implement` is the fix loop, so `set-state.mjs` increments
+  `loops.test` / `loops.review` itself. Previously this relied on the agent also running
+  `loop.mjs bump`, and when it didn't, `loops.max_test` / `loops.max_review` silently
+  stopped bounding anything. The Test and Review phase guides no longer bump by hand.
+- **The review gate refuses to approve an unwritten report.** `set-state.mjs gate review
+  approved` now fails while `review.md` is still the scaffolded template -- a clean pass
+  still owes a `_none_` table.
+- **`/jig memory-refresh` no longer overwrites hand-authored memory.** Generated files carry
+  a `<!-- jig:generated` marker; files without it (and past the scaffold placeholder) are
+  left untouched and the fresh draft is written beside them as `<name>.generated.md` to be
+  merged. Curated Project Memory used to be one command away from being replaced by a
+  re-derived draft.
+- **`progress.md` entries follow a schema.** `progress.mjs` rejects headings outside the
+  lifecycle phase names, so qualifiers ("fix pass", "second round") go in the note instead
+  of the heading, and `Spec & Plan` / `spec_plan` can no longer denote the same phase. The
+  task template no longer seeds an `intake` entry, which used to duplicate the one Intake
+  writes. Cleanup now labels its entry `cleanup` rather than `shipped`.
+- Severity values in `review.md` normalize `med` to `medium`, and a `|` inside a claim is
+  escaped rather than shearing the row into extra cells.
+- **Project Memory is written to be read.** Generated `modules.md` groups modules under a
+  `## <area>` heading instead of one flat list, so the file stays scannable as it grows and
+  a spec can cite `modules.md#apps`; `risks.md` sorts highest-severity first and shows the
+  rating inline; `conventions.md` renders topic headings; `index.md` says what each file
+  holds rather than just linking it.
+- **The scaffold templates are now skeletons rather than one-line stubs.** Each memory file
+  ships with its section headings and, in a comment, how to write an entry — because on a
+  mature repo Project Memory is hand-authored, and an empty file gives an author nothing to
+  follow. `risks.md` in particular steers to a short labelled `Bite / Signal / Mitigation`
+  block over a three-column table, which degrades into paragraph-length cells that no longer
+  wrap or diff readably. `index.md` gained a "Read this first" section for the handful of
+  load-bearing decisions.
+- Placeholder detection for the overwrite guard is now the machine marker
+  `<!-- jig:memory-placeholder`, with the pre-0.8 prose still honoured. A skeleton the
+  author fills in becomes protected as soon as that line is deleted, as each template says.
+
+### Fixed
+
+- Slugs no longer truncate mid-word (`...-github-actions-t`) -- the 50-char cap now falls on
+  a word boundary. A `/` in a title is a separator rather than glue, so `lint/test` slugs as
+  `lint-test`, not `linttest`.
+
 ## [0.7.0] - 2026-08-24
 
 ### Added
@@ -116,7 +177,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Ship, and `/sdlc cleanup` after merge.
 - `/sdlc backlog` to groom deferred work in `.sdlc/backlog.md`.
 
-[Unreleased]: https://github.com/ultima95/jig/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/ultima95/jig/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/ultima95/jig/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/ultima95/jig/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/ultima95/jig/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/ultima95/jig/compare/v0.4.0...v0.5.0
