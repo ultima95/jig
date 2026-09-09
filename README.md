@@ -84,7 +84,8 @@ Then **restart Claude Code** so the `jig` skill is picked up. Requires Claude Co
 | --- | --- |
 | `/jig init` | 🧠 Investigate the repo, build **Project Memory**, and walk through `.jig/config.yml` (skippable). |
 | `/jig task "<request>"` | 🎫 Take an issue / bug / feature from intake all the way to shipped. |
-| `/jig status` | 📋 List tasks and their current phase / gate state. |
+| `/jig status [--all]` | 📋 List open tasks and their current phase / gate state (add `--all` for `done` too), plus any state drift. |
+| `/jig doctor` | 🩺 Check every task's `state.json` against its `spec.md` front‑matter, and that no review gate was approved without a written `review.md`. |
 | `/jig config [get\|set\|check]` | ⚙️ View, set, or validate `.jig/config.yml`. |
 | `/jig resume [<YYYYMMDD>/<slug>]` | ⏯️ Resume a paused task at its saved phase. |
 | `/jig cleanup [<YYYYMMDD>/<slug>]` | 🧹 After a merged PR: verify the merge, delete the branch, return to the base branch, and close the task. |
@@ -109,12 +110,14 @@ The `track` scales *which phases run* and *how heavy the gates are* — auto‑s
 
 - **One skill, on‑demand guides.** A slim `SKILL.md` dispatcher loads only the current phase guide from `phases/` — context stays lean.
 - **Inline agent fan‑out.** Phase 0 explorers and Review reviewers/verifiers are dispatched inline via the Agent tool — no Workflow‑tool dependency, fully portable.
-- **Deterministic core, tested.** The mechanical parts — slug/date naming, state & gate transitions, bounded loop counters, findings dedupe + majority‑verdict, memory rendering — are dependency‑free Node scripts with **87 unit tests**.
+- **Deterministic core, tested.** The mechanical parts — slug/date naming, state & gate transitions, bounded loop counters, findings dedupe + majority‑verdict, memory rendering — are dependency‑free Node scripts with **147 unit tests**.
+- **State the agent can't quietly corrupt.** `state.json` and `spec.md`'s front‑matter are written together by one script, loop counters are bumped by the phase transition itself rather than by remembering to, the review gate won't approve an unwritten report, and `/jig doctor` catches any drift that still gets in.
+- **A memory refresh never overwrites what you wrote.** Re‑running Phase 0 rewrites generated files only; hand‑authored memory is left alone and the fresh draft is parked beside it as `<name>.generated.md` to merge.
 - **Everything is files.** `.jig/` holds `config.yml`, `backlog.md` (deferred work), `memory/*.md`, and `tasks/<YYYYMMDD>/<slug>/` (`spec.md` · `progress.md` · `review.md` · `state.json`) — git‑versioned (opt‑out at init) and resumable.
 
 ```text
 skills/jig/
-├── SKILL.md              # dispatcher: init · task · status · config · resume · cleanup · backlog · memory-refresh
+├── SKILL.md              # dispatcher: init · task · status · doctor · config · resume · cleanup · backlog · memory-refresh
 ├── phases/               # understand · intake · spec-plan · implement · test · review · ship
 ├── agents/               # explorer · reviewer · verifier  (inline subagent roles)
 ├── scripts/              # deterministic, unit-tested Node helpers (+ lib/)
