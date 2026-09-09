@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `/jig doctor` also checks that a shipped task actually left a trail: a task at `ship`,
+  `shipped`, or `done` must have an `implement`, `test`, and `review` entry in its
+  `progress.md`. A gate can be approved and a task closed while the work it attests to was
+  never recorded, and nothing caught that. A phase recorded under a non-conforming heading
+  (`## … — Implement`, `## … — Implement (review fix loop) + Test`) is reported as exactly
+  that rather than as missing, since "never happened" and "happened, badly labelled" need
+  different fixes.
+
+### Removed
+
+- `loop.mjs bump`. Bumping became automatic in 0.8.0, which left a manual bump that would
+  silently double-count and trip `loops.max_*` a round early. It had no callers, so rather
+  than keep warning about it in three places the command now refuses and names the
+  transition that replaced it. `loop.mjs reset` is unchanged.
+
 ## [0.8.0] - 2026-09-10
 
 ### Added

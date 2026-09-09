@@ -29,7 +29,7 @@ isn't already clear from `.jig/config.yml`.
 
 ## Notes
 - Never advance to Review with failing tests.
-- **Do not bump the counter yourself.** Moving the phase back from `test` to `implement`
-  is the fix loop, so `set-state.mjs` bumps `loops.test` as part of that transition and
-  prints the new state. A manual `loop.mjs bump test` on top of it double-counts.
+- **The counter bumps itself.** Moving the phase back from `test` to `implement` is the
+  fix loop, so `set-state.mjs` bumps `loops.test` as part of that transition and prints the
+  new state. There is no manual bump; `loop.mjs bump` is refused rather than double-counting.
 - The counter persists in `state.json` `loops.test`, so the bound holds across resumes.

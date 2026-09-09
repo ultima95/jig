@@ -110,7 +110,7 @@ The `track` scales *which phases run* and *how heavy the gates are* — auto‑s
 
 - **One skill, on‑demand guides.** A slim `SKILL.md` dispatcher loads only the current phase guide from `phases/` — context stays lean.
 - **Inline agent fan‑out.** Phase 0 explorers and Review reviewers/verifiers are dispatched inline via the Agent tool — no Workflow‑tool dependency, fully portable.
-- **Deterministic core, tested.** The mechanical parts — slug/date naming, state & gate transitions, bounded loop counters, findings dedupe + majority‑verdict, memory rendering — are dependency‑free Node scripts with **147 unit tests**.
+- **Deterministic core, tested.** The mechanical parts — slug/date naming, state & gate transitions, bounded loop counters, findings dedupe + majority‑verdict, memory rendering — are dependency‑free Node scripts with **152 unit tests**.
 - **State the agent can't quietly corrupt.** `state.json` and `spec.md`'s front‑matter are written together by one script, loop counters are bumped by the phase transition itself rather than by remembering to, the review gate won't approve an unwritten report, and `/jig doctor` catches any drift that still gets in.
 - **A memory refresh never overwrites what you wrote.** Re‑running Phase 0 rewrites generated files only; hand‑authored memory is left alone and the fresh draft is parked beside it as `<name>.generated.md` to merge.
 - **Everything is files.** `.jig/` holds `config.yml`, `backlog.md` (deferred work), `memory/*.md`, and `tasks/<YYYYMMDD>/<slug>/` (`spec.md` · `progress.md` · `review.md` · `state.json`) — git‑versioned (opt‑out at init) and resumable.

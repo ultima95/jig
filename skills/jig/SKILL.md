@@ -124,8 +124,10 @@ Show the open tasks and their current phase/gate state.
    drift it finds — relay that too, and offer to repair it (see `### doctor`).
 
 ### doctor
-Check that every task's `state.json` agrees with its `spec.md` front-matter, and that no
-review gate is approved without a written `review.md`.
+Check every task for: `state.json` disagreeing with its `spec.md` front-matter; a review
+gate approved without a written `review.md`; and a shipped task whose `progress.md` never
+recorded an `implement` / `test` / `review` entry — a gate can be approved and a task
+closed while the work it attests to was never written down.
 
 1. Run: `node "<SKILL_DIR>/scripts/doctor.mjs"` from the repo root (`$(pwd)`). Exits
    non-zero when there is drift.
@@ -222,7 +224,8 @@ other, and it skips the mechanics attached to the transition:
 - `set-state.mjs phase|advance` writes `state.json` **and** `spec.md`'s `status`, and a
   backward move into `implement` is what bumps `loops.test` / `loops.review` — so the
   fix-loop counters, and the `loops.max_*` bounds built on them, only stay honest if the
-  phase moves through the script. Do not call `loop.mjs bump` yourself.
+  phase moves through the script. There is no manual bump — `loop.mjs bump` is refused,
+  because doing both would double-count.
 - `set-state.mjs gate <gate> approved` writes both views, and refuses to approve `review`
   while `review.md` is still the scaffolded template.
 - `set-state.mjs field pr|branch|base` is how those get recorded.

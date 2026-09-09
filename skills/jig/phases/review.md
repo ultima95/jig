@@ -36,9 +36,8 @@ Memory (index-first, lazy): load `conventions.md` (for the conventions dimension
    - **Confirmed `real` findings exist:** compare `loops.review` in `state.json` (fix
      loops already spent) to `loops.max_review` (default 2). Under the limit → go back to
      Implement (`node "<SKILL_DIR>/scripts/set-state.mjs" "<taskDir>" phase implement`) to
-     fix them, then re-run Test and Review; that transition bumps `loops.review` itself, so
-     do **not** also run `loop.mjs bump review`. At/over the limit → STOP and escalate to
-     the developer.
+     fix them, then re-run Test and Review; that transition bumps `loops.review` itself
+     (there is no manual bump). At/over the limit → STOP and escalate to the developer.
    - **Clean (no `real` findings):** this is the **review gate**. Per `.jig/config.yml`
      `gates.review`: `hard` (default) and track not `hotfix` → present the change summary
      and ask the developer to APPROVE to ship. `soft`/`off` or `hotfix` → proceed.
