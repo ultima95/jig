@@ -20,17 +20,25 @@ Memory (index-first, lazy): load `conventions.md` (for the conventions dimension
    each finding's `verdict` with the majority-refute rule — write the verifier votes to a
    JSON file and run `node "<SKILL_DIR>/scripts/review.mjs" verdict <votes.json>` (prints
    `real` or `refuted`). Keep the `verdict` on each finding.
-5. **Write the report.** Put the final findings (each with its `verdict`) in a JSON file and
-   run `node "<SKILL_DIR>/scripts/review.mjs" write "<taskDir>" <findings.json>` to write
-   `review.md`. When `git.track_state`, commit `review.md` with the `.jig/` state (see SKILL.md
+5. **Write the report.** Put the final findings in a JSON file and run
+   `node "<SKILL_DIR>/scripts/review.mjs" write "<taskDir>" <findings.json>` to write
+   `review.md`. Each finding is `{dimension, round, file, line, severity, claim, verdict, fix}`
+   — `severity` is `low|medium|high`, `round` is which review pass raised it, and `fix` is what
+   resolved it (all of these are columns; don't cram them into `claim`). **A clean pass writes
+   the report too** — pass `[]` and the table renders a `_none_` row. This is not optional
+   bookkeeping: `set-state.mjs` refuses to approve the review gate while `review.md` is still
+   the untouched template. Any prose belongs under a `## Summary` heading above the table,
+   which survives later rewrites; anything else you add by hand does not.
+   When `git.track_state`, commit `review.md` with the `.jig/` state (see SKILL.md
    § Committing `.jig/` state) — a standalone `.jig/` commit on a clean pass; when looping
    back to Implement, the fix commits there carry it.
 6. **Decide:**
-   - **Confirmed `real` findings exist:** bump the loop
-     (`node "<SKILL_DIR>/scripts/loop.mjs" "<taskDir>" bump review`) and compare to
-     `loops.max_review` (default 2). Under the limit → go back to Implement
-     (`node "<SKILL_DIR>/scripts/set-state.mjs" "<taskDir>" phase implement`) to fix them,
-     then re-run Test and Review. At/over the limit → STOP and escalate to the developer.
+   - **Confirmed `real` findings exist:** compare `loops.review` in `state.json` (fix
+     loops already spent) to `loops.max_review` (default 2). Under the limit → go back to
+     Implement (`node "<SKILL_DIR>/scripts/set-state.mjs" "<taskDir>" phase implement`) to
+     fix them, then re-run Test and Review; that transition bumps `loops.review` itself, so
+     do **not** also run `loop.mjs bump review`. At/over the limit → STOP and escalate to
+     the developer.
    - **Clean (no `real` findings):** this is the **review gate**. Per `.jig/config.yml`
      `gates.review`: `hard` (default) and track not `hotfix` → present the change summary
      and ask the developer to APPROVE to ship. `soft`/`off` or `hotfix` → proceed.

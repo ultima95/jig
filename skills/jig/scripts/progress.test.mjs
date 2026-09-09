@@ -36,3 +36,22 @@ test('appendProgress adds distinct entries on repeated calls', () => {
   assert.match(md, /— ship/);
   assert.match(md, /opened PR #12/);
 });
+
+test('a new task has no phase entry yet, so Intake does not produce a duplicate', () => {
+  const taskDir = newTask();
+  assert.doesNotMatch(read(taskDir), /^## \d{4}-\d{2}-\d{2} — intake/m);
+  appendProgress(taskDir, 'intake', 'clarified scope');
+  assert.equal(read(taskDir).match(/— intake/g).length, 1);
+});
+
+test('appendProgress rejects a phase label outside the lifecycle', () => {
+  const taskDir = newTask();
+  assert.throws(() => appendProgress(taskDir, 'Spec & Plan', 'x'), /unknown phase/);
+  assert.throws(() => appendProgress(taskDir, 'implement (fix pass)', 'x'), /unknown phase/);
+});
+
+test('appendProgress accepts cleanup, which is a phase guide but not a state', () => {
+  const taskDir = newTask();
+  appendProgress(taskDir, 'cleanup', 'deleted the branch');
+  assert.match(read(taskDir), /— cleanup/);
+});

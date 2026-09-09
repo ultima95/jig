@@ -1,40 +1,52 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { isMain, jigPaths } from './lib/paths.mjs';
+import { isMain } from './lib/paths.mjs';
+import { listTaskEntries } from './lib/tasks.mjs';
+import { auditTasks, formatDoctor } from './doctor.mjs';
 
 export function listTasks(projectRoot) {
-  const { tasksDir } = jigPaths(projectRoot);
-  if (!fs.existsSync(tasksDir)) return [];
-  const tasks = [];
-  for (const day of fs.readdirSync(tasksDir)) {
-    const dayPath = path.join(tasksDir, day);
-    if (!fs.statSync(dayPath).isDirectory()) continue;
-    for (const slug of fs.readdirSync(dayPath)) {
-      const statePath = path.join(dayPath, slug, 'state.json');
-      if (!fs.existsSync(statePath)) continue;
-      try {
-        tasks.push(JSON.parse(fs.readFileSync(statePath, 'utf8')));
-      } catch { /* skip malformed state.json */ }
-    }
-  }
-  return tasks.sort((a, b) => (a.task < b.task ? 1 : a.task > b.task ? -1 : 0));
+  return listTaskEntries(projectRoot).map((e) => e.state);
 }
 
-export function formatStatus(tasks) {
-  if (!tasks.length) return 'No tasks yet. Start one with: /jig task "<request>"';
-  const header = 'TASK'.padEnd(40) + ' ' + 'PHASE'.padEnd(10) + ' GATES';
+export function openTasks(tasks) {
+  return (tasks || []).filter((t) => t.phase !== 'done');
+}
+
+const MIN_TASK_COL = 40;
+
+function hiddenNote(hidden) {
+  return `${hidden} done task(s) hidden — run \`/jig status --all\` to include them.`;
+}
+
+export function formatStatus(tasks, { hidden = 0 } = {}) {
+  if (!tasks.length) {
+    return hidden
+      ? `No open tasks — all ${hidden} done.`
+      : 'No tasks yet. Start one with: /jig task "<request>"';
+  }
+  // Size the task column to the widest id so PHASE/GATES stay aligned; long
+  // slugs used to overflow a hard-coded 40 and shear the columns apart.
+  const width = Math.max(MIN_TASK_COL, ...tasks.map((t) => String(t.task).length));
+  const header = 'TASK'.padEnd(width) + ' ' + 'PHASE'.padEnd(10) + ' GATES';
   const rows = tasks.map((t) => {
     const gates = Object.entries(t.gates || {}).map(([k, v]) => `${k}:${v}`).join(' ');
-    return String(t.task).padEnd(40) + ' ' + String(t.phase).padEnd(10) + ' ' + gates;
+    return String(t.task).padEnd(width) + ' ' + String(t.phase).padEnd(10) + ' ' + gates;
   });
   const lines = [header, ...rows];
   const shipped = tasks.filter((t) => t.phase === 'shipped').length;
   if (shipped) {
     lines.push('', `${shipped} task(s) in 'shipped' — run /jig cleanup <taskId> to verify the merge and delete the branch.`);
   }
+  if (hidden) lines.push('', hiddenNote(hidden));
   return lines.join('\n');
 }
 
 if (isMain(import.meta.url)) {
-  console.log(formatStatus(listTasks(process.cwd())));
+  const all = listTasks(process.cwd());
+  const showAll = process.argv.includes('--all');
+  const shown = showAll ? all : openTasks(all);
+  console.log(formatStatus(shown, { hidden: showAll ? 0 : all.length - shown.length }));
+
+  // Surface state drift here so it cannot sit unnoticed: status is the command
+  // every session runs, and drift means state.json was edited outside the scripts.
+  const drift = auditTasks(process.cwd());
+  if (drift.length) console.log('\n' + formatDoctor(drift));
 }

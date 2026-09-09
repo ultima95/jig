@@ -6,6 +6,7 @@ import path from 'node:path';
 import { scaffoldJig } from './scaffold.mjs';
 import { createTask } from './new-task.mjs';
 import { setPhase, advance, setGate, setField } from './set-state.mjs';
+import { writeReview } from './review.mjs';
 
 const tmps = [];
 function newTask() {
@@ -61,4 +62,49 @@ test('setField writes a whitelisted key to state.json (not spec.md)', () => {
 test('setField rejects an unknown key', () => {
   const taskDir = newTask();
   assert.throws(() => setField(taskDir, 'nope', 'x'), /invalid field/);
+});
+
+test('looping review back to implement bumps the review counter', () => {
+  const taskDir = newTask();
+  setPhase(taskDir, 'review');
+  assert.equal(state(taskDir).loops.review, 0);
+  setPhase(taskDir, 'implement');
+  assert.equal(state(taskDir).loops.review, 1);
+});
+
+test('looping test back to implement bumps the test counter', () => {
+  const taskDir = newTask();
+  setPhase(taskDir, 'test');
+  setPhase(taskDir, 'implement');
+  assert.equal(state(taskDir).loops.test, 1);
+  assert.equal(state(taskDir).loops.review, 0);
+});
+
+test('advancing forward never bumps a loop counter', () => {
+  const taskDir = newTask();
+  setPhase(taskDir, 'implement');
+  advance(taskDir); // implement -> test
+  advance(taskDir); // test -> review
+  const s = state(taskDir);
+  assert.equal(s.loops.test, 0);
+  assert.equal(s.loops.review, 0);
+});
+
+test('approving the review gate is refused while review.md is still the template', () => {
+  const taskDir = newTask();
+  assert.throws(() => setGate(taskDir, 'review', 'approved'), /review\.md/);
+  assert.equal(state(taskDir).gates.review, 'pending');
+});
+
+test('approving the review gate succeeds once review.md is written', () => {
+  const taskDir = newTask();
+  writeReview(taskDir, []); // a clean pass still writes a report
+  setGate(taskDir, 'review', 'approved');
+  assert.equal(state(taskDir).gates.review, 'approved');
+});
+
+test('the spec_plan gate is not blocked by an unwritten review.md', () => {
+  const taskDir = newTask();
+  setGate(taskDir, 'spec_plan', 'approved');
+  assert.equal(state(taskDir).gates.spec_plan, 'approved');
 });

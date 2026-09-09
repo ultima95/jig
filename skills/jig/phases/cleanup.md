@@ -29,7 +29,7 @@ phase is expected to run in a LATER session than Ship.
    CLOSED-not-merged warning (step 2).
 6. **Delete the remote branch** if `git.delete_remote` (default `true`) and it still exists:
    `git push origin --delete <branch>` (confirm per `trust_level`: `strict` confirms; others auto).
-7. Record: `node "<SKILL_DIR>/scripts/progress.mjs" "<taskDir>" shipped "cleaned up: deleted <branch>, on <base>"`.
+7. Record: `node "<SKILL_DIR>/scripts/progress.mjs" "<taskDir>" cleanup "cleaned up: deleted <branch>, on <base>"`.
 8. Close the task: `node "<SKILL_DIR>/scripts/set-state.mjs" "<taskDir>" advance`
    (phase `shipped` → `done`).
 9. **Commit the final `.jig/` state on the base** when `git.track_state` (see SKILL.md

@@ -116,10 +116,22 @@ Create a new task folder for an issue/bug/feature.
    to verify the merge, delete the branch, return to base, and close the task.
 
 ### status
-Show all tasks and their current phase/gate state.
+Show the open tasks and their current phase/gate state.
 
-1. Run: `node "<SKILL_DIR>/scripts/status.mjs"` from the repo root (`$(pwd)`).
-2. Print the output verbatim.
+1. Run: `node "<SKILL_DIR>/scripts/status.mjs"` from the repo root (`$(pwd)`). Add `--all`
+   to include `done` tasks (they are hidden by default, with a count).
+2. Print the output verbatim. Status also runs the **doctor** check and appends any state
+   drift it finds — relay that too, and offer to repair it (see `### doctor`).
+
+### doctor
+Check that every task's `state.json` agrees with its `spec.md` front-matter, and that no
+review gate is approved without a written `review.md`.
+
+1. Run: `node "<SKILL_DIR>/scripts/doctor.mjs"` from the repo root (`$(pwd)`). Exits
+   non-zero when there is drift.
+2. Print the output verbatim. Repair drift by re-issuing the real transition through
+   `set-state.mjs` (`phase` / `gate` / `field`) so both files are written together —
+   never by hand-editing `state.json` or `spec.md` to match.
 
 ### config
 View, edit, and validate `.jig/config.yml`. Backed by `scripts/config.mjs`; run it from the
@@ -200,6 +212,24 @@ When `.jig/` is tracked (`git.track_state: true`, chosen at init), its files —
 
 When `.jig/` is **not** tracked (`git.track_state: false`, gitignored) or the repo is non-git,
 skip all of this — `.jig/` lives on disk and is still resumable.
+
+## Task state is script-owned
+`state.json` and `spec.md`'s front-matter are two views of one fact, and the scripts write
+both together. **Never edit either by hand** — not to fix a phase, not to record a PR, not
+to "just set it to done". A direct edit updates one view and silently desynchronizes the
+other, and it skips the mechanics attached to the transition:
+
+- `set-state.mjs phase|advance` writes `state.json` **and** `spec.md`'s `status`, and a
+  backward move into `implement` is what bumps `loops.test` / `loops.review` — so the
+  fix-loop counters, and the `loops.max_*` bounds built on them, only stay honest if the
+  phase moves through the script. Do not call `loop.mjs bump` yourself.
+- `set-state.mjs gate <gate> approved` writes both views, and refuses to approve `review`
+  while `review.md` is still the scaffolded template.
+- `set-state.mjs field pr|branch|base` is how those get recorded.
+- `progress.mjs` is the only writer of `progress.md` entries; it rejects headings outside
+  the lifecycle phase names, so qualifiers ("fix pass", "second round") go in the note.
+
+`/jig status` surfaces any drift; `/jig doctor` reports it on its own and exits non-zero.
 
 ## Notes
 - All commands operate on the current working directory as the project root.

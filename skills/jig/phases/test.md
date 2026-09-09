@@ -19,9 +19,8 @@ isn't already clear from `.jig/config.yml`.
    Review: `node "<SKILL_DIR>/scripts/set-state.mjs" "<taskDir>" advance`
    (phase `test` → `review`). Follow the Review phase (`<SKILL_DIR>/phases/review.md`).
 4. If tests FAIL:
-   - Bump the counter: `node "<SKILL_DIR>/scripts/loop.mjs" "<taskDir>" bump test`
-     (prints the new count).
-   - Compare it to `loops.max_test` in `.jig/config.yml` (default 3):
+   - Compare `loops.test` in `state.json` (fix loops already spent) to `loops.max_test`
+     in `.jig/config.yml` (default 3):
      - Under the limit: return to Implement — move the phase back with
        `node "<SKILL_DIR>/scripts/set-state.mjs" "<taskDir>" phase implement`, feed the
        failures to the implementer to fix, then come back to Test.
@@ -30,4 +29,7 @@ isn't already clear from `.jig/config.yml`.
 
 ## Notes
 - Never advance to Review with failing tests.
+- **Do not bump the counter yourself.** Moving the phase back from `test` to `implement`
+  is the fix loop, so `set-state.mjs` bumps `loops.test` as part of that transition and
+  prints the new state. A manual `loop.mjs bump test` on top of it double-counts.
 - The counter persists in `state.json` `loops.test`, so the bound holds across resumes.

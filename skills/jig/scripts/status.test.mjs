@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { scaffoldJig } from './scaffold.mjs';
 import { createTask } from './new-task.mjs';
-import { listTasks, formatStatus } from './status.mjs';
+import { listTasks, formatStatus, openTasks } from './status.mjs';
 
 const tmps = [];
 function mktmp() {
@@ -48,4 +48,38 @@ test('formatStatus hints cleanup when a task is shipped', () => {
 test('formatStatus omits the cleanup hint when nothing is shipped', () => {
   const out = formatStatus([{ task: '20260707/x', phase: 'intake', gates: { spec_plan: 'pending' } }]);
   assert.doesNotMatch(out, /\/jig cleanup/);
+});
+
+test('formatStatus widens the task column to fit long ids instead of overflowing', () => {
+  const long = '20260909/remove-linttest-from-ci-to-reduce-github-actions';
+  const out = formatStatus([{ task: long, phase: 'done', gates: { review: 'approved' } }]);
+  const [header, row] = out.split('\n');
+  assert.ok(row.includes(long));
+  // PHASE starts at the same column in the header and the row
+  assert.equal(header.indexOf('PHASE'), row.indexOf('done'));
+});
+
+test('formatStatus keeps a stable minimum width for short ids', () => {
+  const out = formatStatus([{ task: '20260706/x', phase: 'intake', gates: {} }]);
+  const [header, row] = out.split('\n');
+  assert.equal(header.indexOf('PHASE'), row.indexOf('intake'));
+});
+
+test('openTasks drops done tasks and keeps everything in flight', () => {
+  const tasks = [
+    { task: 'a', phase: 'done', gates: {} },
+    { task: 'b', phase: 'shipped', gates: {} },
+    { task: 'c', phase: 'implement', gates: {} },
+  ];
+  assert.deepEqual(openTasks(tasks).map((t) => t.task), ['b', 'c']);
+});
+
+test('formatStatus notes how many done tasks it hid when filtering to open', () => {
+  const tasks = [{ task: 'a', phase: 'done', gates: {} }, { task: 'b', phase: 'implement', gates: {} }];
+  const out = formatStatus(openTasks(tasks), { hidden: tasks.length - openTasks(tasks).length });
+  assert.match(out, /1 done/);
+});
+
+test('formatStatus says so when every task is done and none are open', () => {
+  assert.match(formatStatus([], { hidden: 3 }), /3 done/);
 });
