@@ -17,6 +17,22 @@ test('slugify caps length at 50 chars with no trailing dash', () => {
   assert.ok(!s.endsWith('-'));
 });
 
+test('slugify treats a slash as a separator, not as glue', () => {
+  assert.equal(slugify('remove lint/test from CI'), 'remove-lint-test-from-ci');
+});
+
+test('slugify truncates at a word boundary rather than mid-word', () => {
+  // Full slug would be 54 chars; the cap drops the trailing word, never splits one.
+  assert.equal(
+    slugify('remove lint/test from CI to reduce GitHub Actions time'),
+    'remove-lint-test-from-ci-to-reduce-github-actions',
+  );
+});
+
+test('slugify keeps a single over-long word rather than emitting nothing', () => {
+  assert.equal(slugify('a'.repeat(60)), 'a'.repeat(50));
+});
+
 test('uniqueSlug returns base when free, else -2, -3', () => {
   assert.equal(uniqueSlug('x', []), 'x');
   assert.equal(uniqueSlug('x', ['x']), 'x-2');
